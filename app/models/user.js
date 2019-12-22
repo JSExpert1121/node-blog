@@ -29,51 +29,19 @@ const userSchema = new mongoose.Schema(
             enum: ['admin', 'worker'],
             default: 'worker'
         },
-        profile: {
-            avatar: {
-                type: String,
-                validator: {
-                    validator: v => v === '' ? true : validator.isURL(v),
-                    message: 'Not valid URL'
-                }
+        access: {
+            locations: {
+                type: [String],
+                default: []
             },
-            phone: String,
-            address1: String,
-            address2: String,
-            city: String,
-            country: String,
-            phoneVerified: Boolean,
-            twitter: {
+            session: {
                 type: String,
-                validate: {
-                    validator: v => v === '' ? true : validator.isURL(v),
-                    message: 'Not valid URL'
-                }
-            },
-            github: {
-                type: String,
-                validate: {
-                    validator: v => v === '' ? true : validator.isURL(v),
-                    message: 'Not valid URL'
-                }
-            },
-            linkedin: {
-                type: String,
-                validate: {
-                    validator: v => v === '' ? true : validator.isURL(v),
-                    message: 'Not valid URL'
-                }
-            },
-            facebook: {
-                type: String,
-                validate: {
-                    validator: v => v === '' ? true : validator.isURL(v),
-                    message: 'Not valid URL'
-                }
-            },
-            meta: {
-                follows: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+                default: '',
             }
+        },
+        profile: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Profile'
         }
     },
     {
