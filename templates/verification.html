@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        .button-normal {
+            background-color: white;
+            font-size: 1rem;
+            width: 120px;
+            padding: 8px 24px;
+            border-radius: 4px;
+            box-shadow: 0 1px 6px rgba(57, 73, 76, 0.35);
+            text-decoration: none;
+            color: white;
+            background-color: #119749;
+        }
+
+        .button-normal:hover {
+            box-shadow: 0 2px 10px 1px rgba(57, 73, 76, 0.4), 0 1px 2px rgba(57, 73, 76, 0.25);
+        }
+
+        .button-down {
+            background-color: #5099DE;
+            color: white;
+            box-shadow: none;
+            font-size: 1rem;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="max-width: 720px; margin: auto;">
+        <h1 style="text-align:center; margin-top: 80px">Verify your email</h1>
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="{{ clientURL }}/verifymail?sec_token={{ token }}" class="button-normal">
+                Verify
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>
