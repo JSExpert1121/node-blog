@@ -34,6 +34,7 @@ passport.use(new JwtStrategy(jwtOptions, (payload, done) => {
         }
 
         user.expired = payload.expired
+        user.session = payload.session
         return !user ? done(null, false) : done(null, user)
     })
 }))

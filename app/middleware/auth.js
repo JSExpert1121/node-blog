@@ -6,14 +6,26 @@ module.exports = {
         passport.authenticate('jwt', {
             session: false
         })(req, res, next),
-    notExpired: (req, res, next) => {
+    sessionValid: (req, res, next) => {
         const user = req.user
-        if (user.expired && user.expired > (Date.now() / 1000)) {
-            return next()
+        if (!user.access ||
+            !user.access.session ||
+            user.access.session !== user.session) {
+            return res.status(401).json({
+                errors: 'You must log in again'
+            })
         }
 
-        res.status(401).json({
-            errors: 'Token expired'
-        })
+        return next()
     },
+    notExpired: (req, res, next) => {
+        const user = req.user
+        if (!user.expired || user.expired < (Date.now() / 1000)) {
+            return res.status(401).json({
+                errors: 'Token expired'
+            })
+        }
+
+        return next()
+    }
 }

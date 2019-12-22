@@ -3,10 +3,12 @@ const { matchedData } = require('express-validator')
 const jwt = require('jsonwebtoken')
 
 const { handleError } = require('../middleware/common')
-const User = require('../models/user')
 const mailer = require('../../service/mailer')
 const cryptor = require('../../utils/crypto')
+const uuidv4 = require('uuid/v4')
 
+const User = require('../models/user')
+const Profile = require('../models/profile')
 
 /**
  * Signup middleware
@@ -22,6 +24,7 @@ module.exports = {
                 })
             }
 
+            // create a new User instance
             const user = new User({
                 name: {
                     first: body.first_name,
@@ -30,8 +33,19 @@ module.exports = {
                 email: body.email,
                 password: body.password
             })
-
             await user.save()
+
+            // create a new Profile instance with the new user._id
+            const profile = new Profile({
+                user: user._id
+            })
+            await profile.save()
+
+            // set a profile id to the user instance
+            user.profile = profile._id
+            await user.save()
+
+            // send email verification mail
             await sendVerificationMail(user)
             res.json({
                 success: 'User was registered successfully'
@@ -44,10 +58,11 @@ module.exports = {
             handleError(res, error)
         }
     },
+
     async login(req, res) {
         const body = matchedData(req)
         try {
-            const user = await findUser(body.email, 'name email password')
+            const user = await findUser(body.email, 'name email password access')
             if (!user) {
                 return res.status(404).json({
                     errors: 'User not found'
@@ -60,6 +75,9 @@ module.exports = {
                     errors: 'Password not match'
                 })
             }
+
+            user.access.session = uuidv4()
+            await user.save()
 
             return res.json({
                 user: {
@@ -123,9 +141,7 @@ module.exports = {
                 success: 'Email was sent'
             })
         } catch (error) {
-            return res.status(500).json({
-                errors: error.message
-            })
+            handleError(res, error)
         }
     },
 
@@ -152,9 +168,7 @@ module.exports = {
                 })
             }
         } catch (error) {
-            return res.status(500).json({
-                errors: error.message
-            })
+            handleError(res, error)
         }
     },
 
@@ -163,7 +177,9 @@ module.exports = {
 
         try {
             const payload = jwt.decode(body.secToken)
-            if (payload && payload.email && payload.email === req.user.email) {
+            if (payload &&
+                payload.email &&
+                payload.email === req.user.email) {
 
                 const user = req.user
                 return res.json({
@@ -182,9 +198,21 @@ module.exports = {
                 })
             }
         } catch (error) {
-            return res.status(500).json({
-                errors: error.message
+            handleError(res, error)
+        }
+    },
+
+    async logout(req, res) {
+        const user = req.user
+        try {
+            user.access.session = ''
+            await user.save()
+
+            res.json({
+                success: 'OK'
             })
+        } catch (error) {
+            handleError(res, error)
         }
     }
 }
@@ -193,13 +221,15 @@ function generateAccessToken(user) {
     const expired = Math.floor(Date.now() / 1000) + 60 * process.env.JWT_EXPIRE
     return cryptor.encrypt(jwt.sign({
         id: user._id,
+        session: user.access.session,
         expired
     }, process.env.JWT_SECRET))
 }
 
 function generateRefreshToken(user) {
     return jwt.sign({
-        email: user.email
+        email: user.email,
+        session: user.access.session
     }, process.env.JWT_REFRESH_SECRET)
 }
 
