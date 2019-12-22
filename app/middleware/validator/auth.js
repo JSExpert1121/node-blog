@@ -89,6 +89,15 @@ module.exports = {
                 min: 8
             }).withMessage('Password is too short'),
         commonValidator
+    ],
+    refresh: [
+        check('secToken')
+            .exists()
+            .withMessage('Missing')
+            .not()
+            .isEmpty()
+            .withMessage('Is Empty'),
+        commonValidator
     ]
 }
 
