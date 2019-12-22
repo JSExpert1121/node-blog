@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema(
             unique: true,
             required: true
         },
+        emailVerified: Boolean,
         password: {
             type: String,
             required: true,
@@ -42,7 +43,6 @@ const userSchema = new mongoose.Schema(
             city: String,
             country: String,
             phoneVerified: Boolean,
-            emailVerified: Boolean,
             twitter: {
                 type: String,
                 validate: {
@@ -114,7 +114,6 @@ userSchema.pre('save', function (next) {
 })
 
 userSchema.methods.comparePassword = function (pwd) {
-    console.log('+++++++', this.password)
     return bcrypt.compare(pwd, this.password)
 }
 

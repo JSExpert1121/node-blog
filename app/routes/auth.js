@@ -2,7 +2,7 @@ const express = require('express')
 const authValidators = require('../middleware/validator/auth')
 
 const authController = require('../controllers/auth')
-const authMiddleware = require('../middleware/auth')
+// const authMiddleware = require('../middleware/auth')
 
 const router = express.Router()
 
@@ -17,19 +17,19 @@ router.post('/login',
 )
 
 router.post('/verifymail',
-    authMiddleware.authRequired,
-    authMiddleware.notExpired,
     authValidators.verifyEmail,
     authController.verifyEmail
 )
 
-router.post('/forgot-password', (req, res) => {
-    res.json(req.body)
-})
+router.post('/forgot-password',
+    authValidators.forgotPassword,
+    authController.forgotPassword
+)
 
-router.post('/reset', (req, res) => {
-    res.json(req.body)
-})
+router.post('/reset',
+    authValidators.resetPassword,
+    authController.resetPassword
+)
 
 router.post('/refresh', (req, res) => {
     res.json(req.body)

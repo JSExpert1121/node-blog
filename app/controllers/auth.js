@@ -72,21 +72,23 @@ module.exports = {
             handleError(res, error)
         }
     },
+
     async verifyEmail(req, res) {
         const body = matchedData(req)
         try {
             const payload = jwt.decode(body.secToken)
-            if (payload && payload.id === req.user.id) {
-                User.findById(payload.id, (error, user) => {
-                    if (error) {
-                        return handleError(res, error)
-                    }
-
-                    user.profile.emailVerified = true
+            if (payload && payload.id) {
+                const user = await findUserById(payload.id)
+                if (user) {
+                    user.emailVerified = true
                     user.save()
-                    res.json({
+                    return res.json({
                         success: 'Email verified successfully'
                     })
+                }
+
+                return res.status(400).json({
+                    errors: 'Invalid user'
                 })
             } else {
                 res.status(400).json({
@@ -95,6 +97,62 @@ module.exports = {
             }
         } catch (error) {
             handleError(res, error)
+        }
+    },
+
+    async forgotPassword(req, res) {
+        const body = matchedData(req)
+        try {
+            const user = await findUser(body.email, 'name email password')
+            if (!user) {
+                return res.status(404).json({
+                    errors: 'User not found'
+                })
+            }
+
+            const result = await sendResetMail(user)
+            if (!result) {
+                return res.status(500).json({
+                    errors: 'Some errors occured'
+                })
+            }
+
+            return res.json({
+                success: 'Email was sent'
+            })
+        } catch (error) {
+            return res.status(500).json({
+                errors: error.message
+            })
+        }
+    },
+
+    async resetPassword(req, res) {
+        const body = matchedData(req)
+        try {
+            const payload = jwt.decode(body.secToken)
+            if (payload && payload.id) {
+                const user = await findUserById(payload.id)
+                if (user) {
+                    user.password = body.password
+                    user.save()
+                    return res.json({
+                        success: 'Password saved successfully'
+                    })
+                }
+
+                return res.status(400).json({
+                    errors: 'Invalid user'
+                })
+            } else {
+                return res.status(400).json({
+                    errors: 'Invalid token'
+                })
+            }
+        } catch (error) {
+            return res.status(500).json({
+                errors: error.message
+            })
         }
     }
 }
@@ -114,7 +172,18 @@ async function findUser(email, fields = null) {
                 return rej(error)
             }
 
-            console.log(user)
+            res(user)
+        })
+    })
+}
+
+async function findUserById(id, fields = null) {
+    return new Promise((res, rej) => {
+        User.findById(id, fields, (error, user) => {
+            if (error) {
+                return rej(error)
+            }
+
             res(user)
         })
     })
@@ -123,15 +192,31 @@ async function findUser(email, fields = null) {
 async function sendVerificationMail(user) {
     const token = jwt.sign({
         id: user._id
-    }, process.env.JWT_SECRET)
+    }, process.env.JWT_VERIFY_SECRET)
 
     const context = {
         clientURL: process.env.CLIENT_URL,
         token
     }
 
-    await mailer.sendMailFromTemplate({
+    return await mailer.sendMailFromTemplate({
         name: user.username,
         email: user.email
     }, 'Verify your mail', 'templates/verification.html', context)
+}
+
+async function sendResetMail(user) {
+    const token = jwt.sign({
+        id: user._id
+    }, process.env.JWT_VERIFY_SECRET)
+
+    const context = {
+        clientURL: process.env.CLIENT_URL,
+        token
+    }
+
+    return await mailer.sendMailFromTemplate({
+        name: user.username,
+        email: user.email
+    }, 'Reset your password', 'templates/forgot.html', context)
 }
