@@ -118,7 +118,7 @@ userSchema.methods.comparePassword = function (pwd) {
 }
 
 userSchema.virtual('username').get(function () {
-    return `${this.first_name} ${this.last_name}`
+    return `${this.name.first} ${this.name.last}`
 })
 
 userSchema.statics.emailExists = function (email) {
