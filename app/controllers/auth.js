@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 const { matchedData } = require('express-validator')
 const jwt = require('jsonwebtoken')
 
@@ -66,7 +67,8 @@ module.exports = {
                     username: user.username,
                     email: user.eamil,
                 },
-                token: generateToken(user)
+                access_token: generateAccessToken(user),
+                refresh_token: generateRefreshToken(user)
             })
         } catch (error) {
             handleError(res, error)
@@ -154,15 +156,51 @@ module.exports = {
                 errors: error.message
             })
         }
+    },
+
+    refresh(req, res) {
+        const body = matchedData(req)
+
+        try {
+            const payload = jwt.decode(body.secToken)
+            if (payload && payload.email && payload.email === req.user.email) {
+
+                const user = req.user
+                return res.json({
+                    user: {
+                        id: user._id,
+                        username: user.username,
+                        email: user.eamil,
+                    },
+                    access_token: generateAccessToken(user),
+                    refresh_token: generateRefreshToken(user)
+                })
+
+            } else {
+                return res.status(400).json({
+                    errors: 'Invalid token'
+                })
+            }
+        } catch (error) {
+            return res.status(500).json({
+                errors: error.message
+            })
+        }
     }
 }
 
-function generateToken(user) {
+function generateAccessToken(user) {
     const expired = Math.floor(Date.now() / 1000) + 60 * process.env.JWT_EXPIRE
     return cryptor.encrypt(jwt.sign({
         id: user._id,
         expired
     }, process.env.JWT_SECRET))
+}
+
+function generateRefreshToken(user) {
+    return jwt.sign({
+        email: user.email
+    }, process.env.JWT_REFRESH_SECRET)
 }
 
 async function findUser(email, fields = null) {

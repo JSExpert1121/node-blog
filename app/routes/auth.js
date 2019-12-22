@@ -2,7 +2,7 @@ const express = require('express')
 const authValidators = require('../middleware/validator/auth')
 
 const authController = require('../controllers/auth')
-// const authMiddleware = require('../middleware/auth')
+const authMiddleware = require('../middleware/auth')
 
 const router = express.Router()
 
@@ -31,9 +31,11 @@ router.post('/reset',
     authController.resetPassword
 )
 
-router.post('/refresh', (req, res) => {
-    res.json(req.body)
-})
+router.post('/refresh',
+    authMiddleware.authRequired,
+    authValidators.refresh,
+    authController.refresh
+)
 
 router.post('/logout', (req, res) => {
     res.json(req.body)
