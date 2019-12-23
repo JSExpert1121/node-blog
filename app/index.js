@@ -7,10 +7,11 @@ const helmet = require('helmet')
 const cors = require('cors')
 const passport = require('passport')
 const i18n = require('i18n')
+const path = require('path')
 
 const app = express()
 
-app.set('port', process.env.PORT || 3000)
+app.set('port', process.env.PORT || 8000)
 
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'))
@@ -31,6 +32,8 @@ app.use(passport.initialize())
 app.use(compression())
 app.use(helmet())
 app.use(express.static('public'))
+app.use(express.static('media'))
+process.env.MEDIA_ROOT = path.join(__dirname, '../media')
 
 app.use('/api/v1', require('./routes'))
 

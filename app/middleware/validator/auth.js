@@ -1,4 +1,3 @@
-const validator = require('validator')
 const { check } = require('express-validator')
 const { commonValidator } = require('../common')
 
