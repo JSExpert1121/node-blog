@@ -1,8 +1,10 @@
+const fs = require('fs')
+const uuidv4 = require('uuid/v4')
 const { matchedData } = require('express-validator')
+const formidable = require('formidable')
 
 // const Profile = require('../models/profile')
 const { handleError } = require('../middleware/common')
-
 const phone = require('../../service/phone')
 
 
@@ -35,6 +37,47 @@ module.exports = {
 
             res.json({
                 profile: profile
+            })
+        } catch (error) {
+            handleError(res, error)
+        }
+    },
+
+    async uploadAvatar(req, res) {
+        const user = req.user
+
+        try {
+            const form = new formidable.IncomingForm()
+            form.encoding = 'utf-8'
+            form.keepExtensions = true
+
+            form.maxFileSize = 10 * 1024 * 1024
+            const path = await new Promise((resolve, reject) => {
+                form.parse(req)
+                    .on('fileBegin', (name, file) => {
+                        const folder = `${process.env.MEDIA_ROOT}/avatar`
+                        if (!fs.existsSync(folder)) {
+                            fs.mkdirSync(folder, { recursive: true })
+                        }
+
+                        file.name = `${uuidv4()}-${file.name}`
+                        file.path = `${process.env.MEDIA_ROOT}/avatar/${file.name}`
+                        console.log(file.path)
+                    })
+                    .on('error', error => reject(error))
+                    .on('file', (name, file) => {
+                        resolve(file.name)
+                    })
+            })
+
+            console.log(path)
+
+            await user.populate('profile').execPopulate()
+            const profile = user.profile
+            profile.avatar = `${process.env.CLIENT_URL}/avatar/${path}`
+            await profile.save()
+            res.json({
+                avatar: profile.avatar
             })
         } catch (error) {
             handleError(res, error)

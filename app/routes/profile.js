@@ -20,6 +20,13 @@ router.put('/',
     profileController.update
 )
 
+router.post('/avatar',
+    authMiddleware.authRequired,
+    authMiddleware.sessionValid,
+    authMiddleware.notExpired,
+    profileController.uploadAvatar
+)
+
 router.post('/sendcode',
     authMiddleware.authRequired,
     authMiddleware.sessionValid,
