@@ -5,7 +5,8 @@ const profileSchema = new mongoose.Schema(
     {
         user: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+            ref: 'User',
+            select: false
         },
         avatar: {
             type: String,
@@ -48,11 +49,16 @@ const profileSchema = new mongoose.Schema(
                 message: 'Not valid URL'
             }
         },
+        code: {
+            value: Number,
+            expire: Number
+        },
         meta: {
-            follows: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+            follows: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] }],
         }
     },
     {
+        versionKey: false,
         validateBeforeSave: true
     }
 )
