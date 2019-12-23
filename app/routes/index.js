@@ -1,10 +1,10 @@
 const express = require('express')
-// const fs = require('fs')
 
 const router = express.Router()
 
 router.use('/auth', require('./auth'))
 router.use('/profile', require('./profile'))
+router.use('/blog', require('./blog'))
 
 router.get('/health', (req, res) => res.json('Hello world'))
 
