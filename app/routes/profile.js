@@ -6,41 +6,60 @@ const profileController = require('../controllers/profile')
 
 const router = express.Router()
 
-router.get('/',
+router.use(
     authMiddleware.authRequired,
     authMiddleware.sessionValid,
-    authMiddleware.notExpired,
+    authMiddleware.notExpired
+)
+
+router.get('/',
     profileController.get
 )
 
 router.put('/',
-    authMiddleware.authRequired,
-    authMiddleware.sessionValid,
-    authMiddleware.notExpired,
     profileController.update
 )
 
 router.post('/avatar',
-    authMiddleware.authRequired,
-    authMiddleware.sessionValid,
-    authMiddleware.notExpired,
     profileController.uploadAvatar
 )
 
 router.post('/sendcode',
-    authMiddleware.authRequired,
-    authMiddleware.sessionValid,
-    authMiddleware.notExpired,
     profileValidator.sendSMS,
     profileController.sendSMS
 )
 
 router.post('/phoneverify',
-    authMiddleware.authRequired,
-    authMiddleware.sessionValid,
-    authMiddleware.notExpired,
     profileValidator.verifyPhone,
     profileController.verifyPhone
+)
+
+router.post('/education',
+    profileValidator.education,
+    profileController.addEducation
+)
+
+router.post('/work',
+    profileValidator.work,
+    profileController.addWork
+)
+
+router.post('/education/:id',
+    profileValidator.education,
+    profileController.updateEducation
+)
+
+router.post('/work/:id',
+    profileValidator.work,
+    profileController.updateWork
+)
+
+router.delete('/education/:id',
+    profileController.deleteEducation
+)
+
+router.delete('/work/:id',
+    profileController.deleteWork
 )
 
 module.exports = router

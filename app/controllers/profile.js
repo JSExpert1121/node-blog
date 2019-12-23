@@ -132,7 +132,164 @@ module.exports = {
             await profile.save()
 
             res.json({
-                success: 'Your phone was verified successfully'
+                success: 'Your phone has been verified successfully'
+            })
+        } catch (error) {
+            handleError(res, error)
+        }
+    },
+
+    async addEducation(req, res) {
+        const user = req.user
+
+        try {
+            const body = matchedData(req)
+            await user.populate('profile').execPopulate()
+            const profile = user.profile
+
+            const educations = profile.qualification.education || []
+            educations.push({
+                university: body.university,
+                specialty: body.specialty,
+                start: new Date(body.start),
+                end: new Date(body.end),
+                degree: body.degree
+            })
+            profile.qualification.education = educations
+            await profile.save()
+
+            res.json({
+                success: 'Education has been added successfully'
+            })
+        } catch (error) {
+            handleError(res, error)
+        }
+    },
+
+    async addWork(req, res) {
+        const user = req.user
+
+        try {
+            const body = matchedData(req)
+            await user.populate('profile').execPopulate()
+            const profile = user.profile
+
+            const history = profile.qualification.history || []
+            history.push({
+                title: body.title,
+                company: body.company,
+                start: new Date(body.start),
+                end: new Date(body.end),
+                role: body.role,
+                content: req.body.content
+            })
+            profile.qualification.history = history
+            await profile.save()
+
+            res.json({
+                success: 'Work history has been added successfully'
+            })
+        } catch (error) {
+            handleError(res, error)
+        }
+    },
+
+    async updateEducation(req, res) {
+        const user = req.user
+
+        try {
+            const body = matchedData(req)
+            await user.populate('profile').execPopulate()
+            const profile = user.profile
+
+            const educations = profile.qualification.education || []
+            const current = educations.find(item => item._id.toString() === req.params.id)
+            if (!current) {
+                return res.status(400).json({
+                    errors: 'Invalid education id'
+                })
+            }
+
+            for (let key in body) {
+                current[key] = body[key]
+            }
+            await profile.save()
+
+            res.json({
+                success: 'Education has been updated successfully'
+            })
+        } catch (error) {
+            handleError(res, error)
+        }
+    },
+
+    async updateWork(req, res) {
+        const user = req.user
+
+        try {
+            const body = matchedData(req)
+            await user.populate('profile').execPopulate()
+            const profile = user.profile
+
+            const history = profile.qualification.history || []
+            const current = history.find(item => item._id.toString() === req.params.id)
+            if (!current) {
+                return res.status(400).json({
+                    errors: 'Invalid work id'
+                })
+            }
+
+            for (let key in body) {
+                current[key] = body[key]
+            }
+            if (req.body.content) {
+                current.content = req.body.content
+            }
+
+            await profile.save()
+
+            res.json({
+                success: 'Work history has been updated successfully'
+            })
+        } catch (error) {
+            handleError(res, error)
+        }
+    },
+
+    async deleteEducation(req, res) {
+        const user = req.user
+
+        try {
+            await user.populate('profile').execPopulate()
+            const profile = user.profile
+
+            const educations = profile.qualification.education || []
+            const newEducations = educations.filter(item => item._id.toString() !== req.params.id)
+            profile.qualification.education = newEducations
+            await profile.save()
+
+            res.json({
+                success: 'Education has been deleted successfully'
+            })
+        } catch (error) {
+            handleError(res, error)
+        }
+    },
+
+    async deleteWork(req, res) {
+        const user = req.user
+
+        try {
+            await user.populate('profile').execPopulate()
+            const profile = user.profile
+
+            const history = profile.qualification.history || []
+            const newHistory = history.filter(item => item._id.toString() !== req.params.id)
+            profile.qualification.history = newHistory
+            await profile.save()
+
+            res.json({
+                success: 'Work history has been deleted successfully'
             })
         } catch (error) {
             handleError(res, error)

@@ -15,12 +15,69 @@ const profileSchema = new mongoose.Schema(
                 message: 'Not valid URL'
             }
         },
+        title: String,
+        description: String,
         phone: String,
         address1: String,
         address2: String,
         city: String,
         country: String,
+        hobbies: [String],
         phoneVerified: Boolean,
+        qualification: {
+            education: [{
+                university: {
+                    type: String,
+                    required: true
+                },
+                specialty: {
+                    type: String,
+                    required: true
+                },
+                start: {
+                    type: Date,
+                    require: true,
+                },
+                end: {
+                    type: Date,
+                    required: true
+                },
+                degree: {
+                    type: String,
+                    enum: ['Bachelor', 'Master', 'Doctor'],
+                }
+            }],
+            history: [{
+                title: {
+                    type: String,
+                    required: true
+                },
+                company: {
+                    type: String,
+                    required: true
+                },
+                role: {
+                    type: String,
+                    enum: [
+                        'Intership',
+                        'Individual Contributor',
+                        'Project Manager',
+                        'Team Leader',
+                        'CTO'
+                    ],
+                    required: true
+                },
+                start: {
+                    type: Date,
+                    require: true,
+                },
+                end: {
+                    type: Date,
+                    required: true
+                },
+                content: String
+            }]
+        },
         twitter: {
             type: String,
             validate: {
