@@ -51,7 +51,7 @@ module.exports = {
             form.encoding = 'utf-8'
             form.keepExtensions = true
 
-            form.maxFileSize = 10 * 1024 * 1024
+            form.maxFileSize = process.env.MAX_FILE_SIZE
             const path = await new Promise((resolve, reject) => {
                 form.parse(req)
                     .on('fileBegin', (name, file) => {
@@ -61,7 +61,7 @@ module.exports = {
                         }
 
                         file.name = `${uuidv4()}-${file.name}`
-                        file.path = `${process.env.MEDIA_ROOT}/avatar/${file.name}`
+                        file.path = `${folder}/${file.name}`
                         console.log(file.path)
                     })
                     .on('error', error => reject(error))
@@ -69,8 +69,6 @@ module.exports = {
                         resolve(file.name)
                     })
             })
-
-            console.log(path)
 
             await user.populate('profile').execPopulate()
             const profile = user.profile

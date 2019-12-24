@@ -21,7 +21,7 @@ router.get('/',
 
 // Get a blog detail
 router.get('/:id',
-    blogController.getBlogs
+    blogController.getBlogDetail
 )
 
 // Authentication required
@@ -34,33 +34,39 @@ router.use(
 // Post a blog
 router.post('/',
     blogValidator.addBlog,
-    blogController.getBlogs
+    blogController.addBlog
 )
 
-// Edit a blog
+// Add a cover image to a blog
+router.post('/:id/cover',
+    blogController.addCoverToBlog
+)
+
+// Update a blog
 router.put('/:id',
-    blogController.getBlogs
+    blogController.updateBlog
 )
 
 // Delete a blog
 router.delete('/:id',
-    blogController.getBlogs
+    blogController.deleteBlog
 )
 
 // Add a comment
 router.post('/:id/comments',
     blogValidator.addComment,
-    blogController.getBlogs
+    blogController.addComment
 )
 
-// Edit a comment
+// Update a comment
 router.put('/:id/comments/:commentId',
-    blogController.getBlogs
+    blogValidator.addComment,
+    blogController.updateComment
 )
 
 // Delete a comment
 router.delete('/:id/comments/:commentId',
-    blogController.getBlogs
+    blogController.deleteComment
 )
 
 module.exports = router

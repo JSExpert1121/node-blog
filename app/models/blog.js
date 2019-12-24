@@ -5,8 +5,7 @@ const blogSchema = new mongoose.Schema(
     {
         user: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            select: false
+            ref: 'User'
         },
         cover: {
             type: String,

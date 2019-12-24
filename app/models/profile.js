@@ -120,4 +120,8 @@ const profileSchema = new mongoose.Schema(
     }
 )
 
+profileSchema.virtual('marks').get(function () {
+    return this.meta.follows ? this.meta.follows.length * 100 : 0
+})
+
 module.exports = mongoose.model('Profile', profileSchema)

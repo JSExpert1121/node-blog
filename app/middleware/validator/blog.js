@@ -2,6 +2,8 @@ const { check } = require('express-validator')
 const { commonValidator } = require('../common')
 const validator = require('validator')
 
+const tags = require('../../models/tags')
+
 module.exports = {
     addBlog: [
         check('title')
@@ -15,13 +17,12 @@ module.exports = {
             .withMessage('Missing')
             .isArray()
             .withMessage('Invalid tags')
+            .custom(v => v.every(item => tags.indexOf(item) >= 0))
+            .withMessage('Unknown tag')
             .isLength({
                 min: 1
             })
             .withMessage('There should exist at least tag'),
-        check('cover')
-            .custom(v => !v || validator.isURL(v))
-            .withMessage('cover image is not a valid URL'),
         commonValidator
     ],
     addComment: [
