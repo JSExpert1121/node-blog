@@ -1,6 +1,5 @@
 const { check } = require('express-validator')
 const { commonValidator } = require('../common')
-const validator = require('validator')
 
 const tags = require('../../models/tags')
 
