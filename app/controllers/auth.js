@@ -71,7 +71,7 @@ module.exports = {
 
             const result = await user.comparePassword(body.password)
             if (!result) {
-                return res.json({
+                return res.status(401).json({
                     errors: 'Password not match'
                 })
             }
@@ -83,7 +83,7 @@ module.exports = {
                 user: {
                     id: user._id,
                     username: user.username,
-                    email: user.eamil,
+                    email: user.email,
                 },
                 access_token: generateAccessToken(user),
                 refresh_token: generateRefreshToken(user)
@@ -183,11 +183,6 @@ module.exports = {
 
                 const user = req.user
                 return res.json({
-                    user: {
-                        id: user._id,
-                        username: user.username,
-                        email: user.eamil,
-                    },
                     access_token: generateAccessToken(user),
                     refresh_token: generateRefreshToken(user)
                 })

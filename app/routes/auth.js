@@ -31,22 +31,21 @@ router.post('/reset',
     authController.resetPassword
 )
 
-router.post('/refresh',
+router.use(
     authMiddleware.authRequired,
-    authMiddleware.sessionValid,
+    authMiddleware.sessionValid
+)
+
+router.post('/refresh',
     authValidators.refresh,
     authController.refresh
 )
 
 router.post('/logout',
-    authMiddleware.authRequired,
-    authMiddleware.sessionValid,
     authController.logout
 )
 
 router.post('/testauth',
-    authMiddleware.authRequired,
-    authMiddleware.sessionValid,
     authMiddleware.notExpired,
     (req, res) => {
         res.json(req.body)
