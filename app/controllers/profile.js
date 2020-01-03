@@ -9,11 +9,52 @@ const phone = require('../../service/phone')
 
 
 module.exports = {
+    async updateUsername(req, res) {
+        const user = req.user
+        try {
+            const body = matchedData(req)
+            user.name.first = body.first_name
+            user.name.last = body.last_name
+            await user.save()
+
+            res.json({
+                id: user._id,
+                username: user.username,
+                email: user.email
+            })
+        } catch (error) {
+            handleError(res, error)
+        }
+    },
+
+    async changePassword(req, res) {
+        const user = req.user
+        try {
+            const body = matchedData(req)
+            const result = await user.comparePassword(body.oldPassword)
+            if (!result) {
+                return res.status(400).json({
+                    errors: 'Old password does not match'
+                })
+            }
+            user.password = body.newPassword
+            await user.save()
+
+            res.json({
+                id: user._id,
+                username: user.username,
+                email: user.email
+            })
+        } catch (error) {
+            handleError(res, error)
+        }
+    },
+
     async get(req, res) {
         const user = req.user
 
         try {
-            await user.populate('profile', '-user -meta').execPopulate()
+            await user.populate('profile', '-user').execPopulate()
             res.json({
                 profile: user.profile
             })
@@ -28,7 +69,7 @@ module.exports = {
         try {
             const body = req.body
 
-            await user.populate('profile', '-user -meta').execPopulate()
+            await user.populate('profile', '-user').execPopulate()
             let profile = user.profile
             for (let key in body) {
                 profile[key] = body[key]
@@ -91,7 +132,7 @@ module.exports = {
             const profile = user.profile
 
             profile.code.value = parseInt(Math.random() * 9000) + 1000
-            profile.code.expire = parseInt(Date.now() / 1000 + 20)      // expired: in 10 seconds
+            profile.code.expire = parseInt(Date.now() / 1000 + 60)      // expired: in 10 seconds
             profile.phone = `${body.phone}`
 
             await phone.sendSMS(body.phone, `${profile.code.value}`)

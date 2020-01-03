@@ -4,6 +4,7 @@ const router = express.Router()
 
 router.use('/auth', require('./auth'))
 router.use('/profile', require('./profile'))
+router.use('/user', require('./user'))
 router.use('/blogs', require('./blog'))
 
 router.get('/health', (req, res) => res.json('Hello world'))

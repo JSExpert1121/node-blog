@@ -21,6 +21,7 @@ const profileSchema = new mongoose.Schema(
         address1: String,
         address2: String,
         city: String,
+        state: String,
         country: String,
         hobbies: [String],
         phoneVerified: Boolean,

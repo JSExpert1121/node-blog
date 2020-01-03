@@ -101,4 +101,28 @@ userSchema.statics.emailExists = function (email) {
     })
 }
 
+userSchema.statics.findUser = function (email, fields = null) {
+    return new Promise((res, rej) => {
+        this.findOne({ email }, fields, (error, user) => {
+            if (error) {
+                return rej(error)
+            }
+
+            res(user)
+        })
+    })
+}
+
+userSchema.statics.findUserById = function (id, fields = null) {
+    return new Promise((res, rej) => {
+        this.findById(id, fields, (error, user) => {
+            if (error) {
+                return rej(error)
+            }
+
+            res(user)
+        })
+    })
+}
+
 module.exports = mongoose.model('User', userSchema)

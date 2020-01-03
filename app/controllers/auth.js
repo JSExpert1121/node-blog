@@ -62,7 +62,7 @@ module.exports = {
     async login(req, res) {
         const body = matchedData(req)
         try {
-            const user = await findUser(body.email, 'name email password access')
+            const user = await User.findUser(body.email, 'name email password access')
             if (!user) {
                 return res.status(404).json({
                     errors: 'User not found'
@@ -98,7 +98,7 @@ module.exports = {
         try {
             const payload = jwt.decode(body.secToken)
             if (payload && payload.id) {
-                const user = await findUserById(payload.id)
+                const user = await User.findUserById(payload.id)
                 if (user) {
                     user.emailVerified = true
                     user.save()
@@ -123,7 +123,7 @@ module.exports = {
     async forgotPassword(req, res) {
         const body = matchedData(req)
         try {
-            const user = await findUser(body.email, 'name email password')
+            const user = await User.findUser(body.email, 'name email password')
             if (!user) {
                 return res.status(404).json({
                     errors: 'User not found'
@@ -150,7 +150,7 @@ module.exports = {
         try {
             const payload = jwt.decode(body.secToken)
             if (payload && payload.id) {
-                const user = await findUserById(payload.id)
+                const user = await User.findUserById(payload.id)
                 if (user) {
                     user.password = body.password
                     user.save()
@@ -226,30 +226,6 @@ function generateRefreshToken(user) {
         email: user.email,
         session: user.access.session
     }, process.env.JWT_REFRESH_SECRET)
-}
-
-async function findUser(email, fields = null) {
-    return new Promise((res, rej) => {
-        User.findOne({ email }, fields, (error, user) => {
-            if (error) {
-                return rej(error)
-            }
-
-            res(user)
-        })
-    })
-}
-
-async function findUserById(id, fields = null) {
-    return new Promise((res, rej) => {
-        User.findById(id, fields, (error, user) => {
-            if (error) {
-                return rej(error)
-            }
-
-            res(user)
-        })
-    })
 }
 
 async function sendVerificationMail(user) {
