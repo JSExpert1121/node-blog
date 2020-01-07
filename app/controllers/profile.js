@@ -72,6 +72,7 @@ module.exports = {
             await user.populate('profile', '-user').execPopulate()
             let profile = user.profile
             for (let key in body) {
+                console.log(key)
                 profile[key] = body[key]
             }
             await profile.save()
@@ -113,7 +114,7 @@ module.exports = {
 
             await user.populate('profile').execPopulate()
             const profile = user.profile
-            profile.avatar = `${process.env.CLIENT_URL}/avatar/${path}`
+            profile.avatar = `${process.env.SERVER_URL}/avatar/${path}`
             await profile.save()
             res.json({
                 avatar: profile.avatar

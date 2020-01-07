@@ -23,6 +23,7 @@ const profileSchema = new mongoose.Schema(
         city: String,
         state: String,
         country: String,
+        zipCode: String,
         hobbies: [String],
         phoneVerified: Boolean,
         qualification: {
