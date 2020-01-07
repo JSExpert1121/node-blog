@@ -31,6 +31,11 @@ router.post('/reset',
     authController.resetPassword
 )
 
+router.post('/logout',
+    authMiddleware.authRequired,
+    authController.logout
+)
+
 router.use(
     authMiddleware.authRequired,
     authMiddleware.sessionValid
@@ -41,9 +46,6 @@ router.post('/refresh',
     authController.refresh
 )
 
-router.post('/logout',
-    authController.logout
-)
 
 router.post('/testauth',
     authMiddleware.notExpired,
