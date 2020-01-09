@@ -14,6 +14,10 @@ router.get('/tags', (req, res) => {
     })
 })
 
+router.get('/count',
+    blogController.getCount
+)
+
 // Get blog list
 router.get('/',
     blogController.getBlogs

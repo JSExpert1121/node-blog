@@ -9,6 +9,18 @@ const Comment = require('../models/comment')
 
 
 module.exports = {
+    async getCount(req, res) {
+        Blog.count({}, (error, count) => {
+            if (error) {
+                handleError(res, error)
+            } else {
+                res.json({
+                    count
+                })
+            }
+        })
+    },
+
     async getBlogs(req, res) {
         const query = req.query
         if (!query.page) {
@@ -16,7 +28,7 @@ module.exports = {
         }
 
         if (!query.pageSize) {
-            query.pageSize = parseInt(process.env.DEFAULT_PAGE_SIZE)
+            query.pageSize = process.env.DEFAULT_PAGE_SIZE
         }
 
         if (!query.sort) {
@@ -31,7 +43,7 @@ module.exports = {
             .select('user cover title short description tags likes dislikes claps edited')
             .sort({ [query.sort]: query.ascend ? 1 : -1 })
             .skip(query.pageSize * (query.page - 1))
-            .limit(query.pageSize)
+            .limit(parseInt(query.pageSize))
             .populate({
                 path: 'user',
                 select: '_id name profile',
