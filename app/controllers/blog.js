@@ -120,6 +120,7 @@ module.exports = {
 
             await blog.save()
             res.json({
+                blog: blog,
                 success: 'Blog has been posted successfully'
             })
         } catch (error) {
@@ -222,10 +223,9 @@ module.exports = {
 
         try {
             const body = matchedData(req)
-            const blog = await findBlogById(req.params.id)
             const comment = new Comment({
                 user: user._id,
-                blog: blog._id,
+                blog: req.params.id,
                 content: body.content
             })
 
@@ -335,8 +335,9 @@ function findCommentByIdAndDelete(id) {
 function findCommentsForBlog(id) {
     return new Promise((resolve, reject) => {
         Comment.find({ blog: id })
-            .select('content')
+            .select('user content createdAt')
             .sort({ createdAt: 1 })
+            .populate('user', '_id name')
             .exec((error, result) => {
                 if (error) {
                     return reject(error)
