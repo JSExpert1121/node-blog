@@ -120,6 +120,7 @@ module.exports = {
 
             await blog.save()
             res.json({
+                blog: blog,
                 success: 'Blog has been posted successfully'
             })
         } catch (error) {
