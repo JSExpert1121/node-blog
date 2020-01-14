@@ -173,16 +173,16 @@ module.exports = {
     },
 
     async updateBlog(req, res) {
-        const user = req.user
+        // const user = req.user
 
         try {
             const body = req.body
             const blog = await findBlogById(req.params.id)
-            if (user._id.toString() !== blog.user.toString()) {
-                return res.status(401).json({
-                    errors: 'Different user'
-                })
-            }
+            // if (user._id.toString() !== blog.user.toString()) {
+            //     return res.status(401).json({
+            //         errors: 'Different user'
+            //     })
+            // }
 
             for (let key in body) {
                 blog[key] = body[key]
