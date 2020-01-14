@@ -20,7 +20,7 @@ router.get('/count',
 
 // Get blog list
 router.get('/',
-    blogController.getBlogs
+    blogController.searchBlogs
 )
 
 // Get a blog detail

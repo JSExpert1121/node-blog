@@ -9,7 +9,7 @@ const Comment = require('../models/comment')
 
 
 module.exports = {
-    async getCount(req, res) {
+    getCount(req, res) {
         Blog.count({}, (error, count) => {
             if (error) {
                 handleError(res, error)
@@ -36,7 +36,7 @@ module.exports = {
         }
 
         if (!query.ascend) {
-            query.ascend = true
+            query.ascend = false
         }
 
         const dbQuery = Blog.find({})
@@ -65,6 +65,83 @@ module.exports = {
             })
 
             res.json({
+                data: blogs
+            })
+        } catch (error) {
+            handleError(res, error)
+        }
+    },
+
+    async searchBlogs(req, res) {
+        const query = req.query
+        if (!query.page) {
+            query.page = 1
+        }
+
+        if (!query.pageSize) {
+            query.pageSize = process.env.DEFAULT_PAGE_SIZE
+        }
+
+        if (!query.sort) {
+            query.sort = 'createdAt'
+        }
+
+        if (!query.ascend || query.ascend === 'false') {
+            query.ascend = false
+        }
+
+        let dbQuery = Blog.find({})
+        if (query.search) {
+            dbQuery = Blog.find({
+                $or: [
+                    { 'title': { '$regex': query.search, '$options': 'i' } },
+                    { 'short': { '$regex': query.search, '$options': 'i' } }
+                ]
+            })
+        }
+
+        let count = 0
+        try {
+            count = await getCount(dbQuery)
+        } catch (error) {
+            handleError(res, error)
+        }
+
+        dbQuery = Blog.find({})
+        if (query.search) {
+            dbQuery = Blog.find({
+                $or: [
+                    { 'title': { '$regex': query.search, '$options': 'i' } },
+                    { 'short': { '$regex': query.search, '$options': 'i' } }
+                ]
+            })
+        }
+        dbQuery = dbQuery.select('user cover title short description tags likes dislikes claps edited')
+            .sort({ [query.sort]: query.ascend ? 1 : -1 })
+            .skip(query.pageSize * (query.page - 1))
+            .limit(parseInt(query.pageSize))
+            .populate({
+                path: 'user',
+                select: '_id name profile',
+                populate: {
+                    path: 'profile',
+                    select: '-_id title avatar'
+                }
+            })
+
+        try {
+            const blogs = await new Promise((resolve, reject) => {
+                dbQuery.exec((error, res) => {
+                    if (error) {
+                        return reject(error)
+                    }
+
+                    resolve(res)
+                })
+            })
+
+            res.json({
+                count: count,
                 data: blogs
             })
         } catch (error) {
@@ -120,7 +197,7 @@ module.exports = {
 
             await blog.save()
             res.json({
-                blog: blog,
+                blog: blog._id,
                 success: 'Blog has been posted successfully'
             })
         } catch (error) {
@@ -173,16 +250,16 @@ module.exports = {
     },
 
     async updateBlog(req, res) {
-        const user = req.user
+        // const user = req.user
 
         try {
             const body = req.body
             const blog = await findBlogById(req.params.id)
-            if (user._id.toString() !== blog.user.toString()) {
-                return res.status(401).json({
-                    errors: 'Different user'
-                })
-            }
+            // if (user._id.toString() !== blog.user.toString()) {
+            //     return res.status(401).json({
+            //         errors: 'Different user'
+            //     })
+            // }
 
             for (let key in body) {
                 blog[key] = body[key]
@@ -190,7 +267,8 @@ module.exports = {
 
             await blog.save()
             res.json({
-                blog: blog
+                blog: blog._id,
+                success: 'Blog has been updated successfully'
             })
         } catch (error) {
             handleError(error)
@@ -283,6 +361,19 @@ module.exports = {
         }
     }
 }
+
+function getCount(query) {
+    return new Promise((resolve, reject) => {
+        query.count((err, count) => {
+            if (err) {
+                return reject(err)
+            }
+
+            resolve(count)
+        })
+    })
+}
+
 
 function findBlogById(id) {
     return new Promise((resolve, reject) => {
