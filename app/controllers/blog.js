@@ -36,7 +36,7 @@ module.exports = {
         }
 
         if (!query.ascend) {
-            query.ascend = true
+            query.ascend = false
         }
 
         const dbQuery = Blog.find({})
