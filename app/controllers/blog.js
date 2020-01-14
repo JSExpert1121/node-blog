@@ -120,6 +120,7 @@ module.exports = {
 
             await blog.save()
             res.json({
+                blog: blog._id,
                 success: 'Blog has been posted successfully'
             })
         } catch (error) {
@@ -172,16 +173,16 @@ module.exports = {
     },
 
     async updateBlog(req, res) {
-        const user = req.user
+        // const user = req.user
 
         try {
             const body = req.body
             const blog = await findBlogById(req.params.id)
-            if (user._id.toString() !== blog.user.toString()) {
-                return res.status(401).json({
-                    errors: 'Different user'
-                })
-            }
+            // if (user._id.toString() !== blog.user.toString()) {
+            //     return res.status(401).json({
+            //         errors: 'Different user'
+            //     })
+            // }
 
             for (let key in body) {
                 blog[key] = body[key]
@@ -189,7 +190,8 @@ module.exports = {
 
             await blog.save()
             res.json({
-                blog: blog
+                blog: blog._id,
+                success: 'Blog has been updated successfully'
             })
         } catch (error) {
             handleError(error)
@@ -222,10 +224,9 @@ module.exports = {
 
         try {
             const body = matchedData(req)
-            const blog = await findBlogById(req.params.id)
             const comment = new Comment({
                 user: user._id,
-                blog: blog._id,
+                blog: req.params.id,
                 content: body.content
             })
 
@@ -335,8 +336,9 @@ function findCommentByIdAndDelete(id) {
 function findCommentsForBlog(id) {
     return new Promise((resolve, reject) => {
         Comment.find({ blog: id })
-            .select('content')
+            .select('user content createdAt')
             .sort({ createdAt: 1 })
+            .populate('user', '_id name')
             .exec((error, result) => {
                 if (error) {
                     return reject(error)
