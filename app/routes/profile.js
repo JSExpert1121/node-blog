@@ -16,6 +16,10 @@ router.get('/',
     profileController.get
 )
 
+router.get('/:id',
+    profileController.getPublic
+)
+
 router.put('/',
     profileController.update
 )

@@ -3,7 +3,7 @@ const uuidv4 = require('uuid/v4')
 const { matchedData } = require('express-validator')
 const formidable = require('formidable')
 
-// const Profile = require('../models/profile')
+const Profile = require('../models/profile')
 const { handleError } = require('../middleware/common')
 const phone = require('../../service/phone')
 
@@ -61,6 +61,20 @@ module.exports = {
         } catch (error) {
             handleError(res, error)
         }
+    },
+
+    getPublic(req, res) {
+        Profile.findOne({ user: req.params.id }, 'avatar title description hobbies qualification twitter github linkedin facebook')
+            .populate('user', 'name')
+            .exec((err, doc) => {
+                if (err) {
+                    handleError(res, err)
+                } else {
+                    res.json({
+                        public: doc
+                    })
+                }
+            })
     },
 
     async update(req, res) {
