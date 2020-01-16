@@ -3,5 +3,6 @@ module.exports = [
     'economy',
     'sports',
     'technology',
-    'story'
+    'story',
+    'medical'
 ]
